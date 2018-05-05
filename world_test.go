@@ -40,20 +40,19 @@ func TestDestroyCity(t *testing.T) {
 		Connections: map[string]string{},
 	}
 
-	w := World{
-		Cities: map[string]City{
-			"c1": c1,
-			"c2": c2,
-			"c3": c3,
-		},
+	w := NewWorld()
+	w.Cities = map[string]City{
+		"c1": c1,
+		"c2": c2,
+		"c3": c3,
 	}
 
-	wAfter := World{
-		Cities: map[string]City{
-			"c2": c2After,
-			"c3": c3After,
-		},
+	wAfter := NewWorld()
+	wAfter.Cities = map[string]City{
+		"c2": c2After,
+		"c3": c3After,
 	}
+
 	// Test cases
 	cases := []struct {
 		testName string
@@ -110,17 +109,14 @@ func TestGetCities(t *testing.T) {
 		},
 	}
 
-	w := World{
-		Cities: map[string]City{
-			"c3": c3,
-			"c2": c2,
-			"c1": c1,
-		},
+	w := NewWorld()
+	w.Cities = map[string]City{
+		"c3": c3,
+		"c2": c2,
+		"c1": c1,
 	}
 
-	wEmpty := World{
-		Cities: map[string]City{},
-	}
+	wEmpty := NewWorld()
 
 	// Test cases
 	cases := []struct {
@@ -142,15 +138,69 @@ func TestGetCities(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.testName, func(t *testing.T) {
-			got := tc.world.getCities()
+			// iterating over map keys may return differently
+			// ordered results over each iteration prior to sort
+			for i := 0; i < 10; i++ {
+				got := tc.world.getCities()
 
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Errorf("got: %+v, want %+v", got, tc.want)
+				if !reflect.DeepEqual(got, tc.want) {
+					t.Errorf("got: %+v, want %+v", got, tc.want)
+				}
 			}
 		})
 	}
 }
 
 func TestCreateAliens(t *testing.T) {
+	// Initial setup
+	c1 := City{
+		Name: "c1",
+		Connections: map[string]string{
+			"c2": "north",
+			"c3": "south",
+		},
+	}
 
+	w := NewWorld()
+	w.Cities = map[string]City{
+		"c1": c1,
+	}
+
+	// Test cases
+	cases := []struct {
+		testName string
+		n        int
+		world    World
+		want     int
+	}{
+		{
+			testName: "no aliens",
+			n:        0,
+			world:    w,
+			want:     0,
+		},
+		{
+			testName: "invalid input",
+			n:        -1,
+			world:    w,
+			want:     0,
+		},
+		{
+			testName: "5 aliens",
+			n:        5,
+			world:    w,
+			want:     5,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.testName, func(t *testing.T) {
+			tc.world.CreateAliens(tc.n)
+
+			got := len(tc.world.Aliens)
+			if got != tc.want {
+				t.Errorf("got: %+v, want %+v", got, tc.want)
+			}
+		})
+	}
 }

@@ -4,11 +4,19 @@ import (
 	"log"
 	"math/rand"
 	"sort"
+	"time"
 )
 
 type World struct {
 	Aliens map[int]Alien
 	Cities map[string]City
+}
+
+func NewWorld() World {
+	return World{
+		Aliens: make(map[int]Alien),
+		Cities: make(map[string]City),
+	}
 }
 
 func (w *World) DestroyCity(city string) {
@@ -25,13 +33,14 @@ func (w *World) CreateAliens(n int) {
 	if n < 1 {
 		return
 	}
+	// Not security-sensitive, use math.rand instead
+	// of crypto.rand
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	cities := w.getCities()
 	for i := 0; i < n; i++ {
-		alien := Alien{
-			Name:     i,
-			Location: cities[rand.Intn(n)], //[0,n)
-		}
+		idx := r.Intn(len(cities)) //[0,len(cities))
+		alien := NewAlien(i, cities[idx])
 		w.Aliens[i] = alien
 	}
 	// TODO: aliens may be randomly placed in the same city
