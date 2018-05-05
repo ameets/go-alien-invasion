@@ -18,18 +18,24 @@ func NewWorld() World {
 	}
 }
 
-func (w *World) DestroyCity(city string, a int) {
-	if v, ok := w.Cities[city]; ok {
+// DestroyCity takes in a city name and invading alien name.
+// The city, it's existing alien, and all connections to it
+// are removed from the world.
+func (w *World) DestroyCity(name string, a int) {
+	if city, ok := w.Cities[name]; ok {
 		for _, c := range w.Cities {
-			c.RemoveConnection(city)
+			c.RemoveConnection(name)
 		}
-		log.Println("%s has been destroyed by alien %d and alien %d", city, v.Alien.Name, a)
-		delete(w.Cities, city)
-		delete(w.Aliens, v.Alien.Name)
-
+		log.Println("%s has been destroyed by alien %d and alien %d!", city.Name, city.Alien.Name, a)
+		delete(w.Cities, city.Name)
+		delete(w.Aliens, city.Alien.Name)
 	}
 }
 
+// CreateAliens takes in the number of aliens to create.
+// Aliens are randomly assigned to cities. If a city already
+// has an alien, the two will duel and destroy the city.
+// No new aliens are created if all a world's cities are destroyed.
 func (w *World) CreateAliens(n int) {
 	if n < 1 {
 		return
@@ -39,25 +45,31 @@ func (w *World) CreateAliens(n int) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	cities := w.getCities()
-	for i := 1; i <= n; i++ {
-		if len(cities) == 0 { //all cities destroyed
+	for i := 0; i < n; i++ {
+		// break if no cities remain in the world
+		if len(cities) == 0 {
 			break
 		}
-		idx := r.Intn(len(cities)) //[0,len(cities))
+		// idx bounds are 0 (inclusive) to len (exclusive)
+		// i.e. `[0,len(cities))`
+		idx := r.Intn(len(cities))
 		c, ok := w.Cities[cities[idx]]
 		if !ok {
 			panic("unexpected error")
 		}
 		if c.HasAlien() {
+			// destroy city instead of creating alien
 			w.DestroyCity(c.Name, i)
 			cities = deleteAtIdx(cities, idx)
 		} else {
+			// create alien in city and add to the world
 			c.Alien.Name = i
+			w.Aliens[i] = c.Alien
 		}
-
 	}
 }
 
+// GetCities returns all the city names in the world.
 func (w *World) getCities() []string {
 	cities := make([]string, len(w.Cities))
 	i := 0
@@ -68,15 +80,13 @@ func (w *World) getCities() []string {
 	return cities
 }
 
+// Deletes the element of `s` at index `idx` and
+// returns the updated string slice.
 func deleteAtIdx(s []string, idx int) []string {
 	// do nothing if out of bounds
 	if idx < 0 || idx >= len(s) {
 		return s
 	}
-
-	// if idx == len(s)-1 { //last element
-	// 	return append(s[:idx]) //delete last element
-	// }
-	return append(s[:idx], s[idx+1:]...) //delete element at idx
-
+	// delete element at idx
+	return append(s[:idx], s[idx+1:]...)
 }

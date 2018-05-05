@@ -9,46 +9,34 @@ import (
 )
 
 func TestDestroyCity(t *testing.T) {
-	log.SetFlags(0)
 	log.SetOutput(ioutil.Discard)
 	// Initial setup
-	c1 := City{
-		Name: "c1",
-		Connections: map[string]string{
-			"c2": "north",
-			"c3": "south",
-		},
-	}
+	c1 := NewCity("c1", map[string]string{
+		"c2": "north",
+		"c3": "south",
+	})
+	c1.Alien.Name = 1
 
-	c2 := City{
-		Name: "c2",
-		Connections: map[string]string{
-			"c1": "south",
-		},
-	}
+	c2 := NewCity("c2", map[string]string{
+		"c1": "south",
+	})
 
-	c3 := City{
-		Name: "c3",
-		Connections: map[string]string{
-			"c1": "north",
-		},
-	}
+	c3 := NewCity("c3", map[string]string{
+		"c1": "north",
+	})
 
-	c2After := City{
-		Name:        "c2",
-		Connections: map[string]string{},
-	}
+	c2After := NewCity("c2", map[string]string{})
 
-	c3After := City{
-		Name:        "c3",
-		Connections: map[string]string{},
-	}
+	c3After := NewCity("c3", map[string]string{})
 
 	w := NewWorld()
 	w.Cities = map[string]City{
 		"c1": c1,
 		"c2": c2,
 		"c3": c3,
+	}
+	w.Aliens = map[int]Alien{
+		c1.Alien.Name: c1.Alien,
 	}
 
 	wAfter := NewWorld()
@@ -80,7 +68,7 @@ func TestDestroyCity(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.testName, func(t *testing.T) {
-			tc.input.DestroyCity(tc.city, 1)
+			tc.input.DestroyCity(tc.city, 2)
 
 			if !reflect.DeepEqual(tc.input, tc.want) {
 				t.Errorf("got: %+v, want %+v", tc.input, tc.want)
@@ -90,30 +78,21 @@ func TestDestroyCity(t *testing.T) {
 }
 
 func TestGetCities(t *testing.T) {
-	log.SetFlags(0)
-	log.SetOutput(ioutil.Discard)
+	//log.SetFlags(0)
+	//log.SetOutput(ioutil.Discard)
 	// Initial setup
-	c1 := City{
-		Name: "c1",
-		Connections: map[string]string{
-			"c2": "north",
-			"c3": "south",
-		},
-	}
+	c1 := NewCity("c1", map[string]string{
+		"c2": "north",
+		"c3": "south",
+	})
 
-	c2 := City{
-		Name: "c2",
-		Connections: map[string]string{
-			"c1": "south",
-		},
-	}
+	c2 := NewCity("c2", map[string]string{
+		"c1": "south",
+	})
 
-	c3 := City{
-		Name: "c3",
-		Connections: map[string]string{
-			"c1": "north",
-		},
-	}
+	c3 := NewCity("c3", map[string]string{
+		"c1": "north",
+	})
 
 	w := NewWorld()
 	w.Cities = map[string]City{
@@ -156,16 +135,12 @@ func TestGetCities(t *testing.T) {
 }
 
 func TestCreateAliens(t *testing.T) {
-	log.SetFlags(0)
 	log.SetOutput(ioutil.Discard)
 	// Initial setup
-	c1 := City{
-		Name: "c1",
-		Connections: map[string]string{
-			"c2": "north",
-			"c3": "south",
-		},
-	}
+	c1 := NewCity("c1", map[string]string{
+		"c2": "north",
+		"c3": "south",
+	})
 
 	w := NewWorld()
 	w.Cities = map[string]City{
@@ -191,6 +166,12 @@ func TestCreateAliens(t *testing.T) {
 			world:    w,
 			want:     0,
 		},
+		{
+			testName: "create 1 alien",
+			n:        1,
+			world:    w,
+			want:     1,
+		},
 	}
 
 	for _, tc := range cases {
@@ -199,6 +180,58 @@ func TestCreateAliens(t *testing.T) {
 
 			got := len(tc.world.Aliens)
 			if got != tc.want {
+				t.Errorf("got: %+v, want %+v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestDeleteAtIdx(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
+	// Test cases
+	cases := []struct {
+		testName string
+		input    []string
+		index    int
+		want     []string
+	}{
+		{
+			testName: "idx out of lower bound",
+			input:    []string{"c3", "c4", "c1", "c5"},
+			index:    -1,
+			want:     []string{"c3", "c4", "c1", "c5"},
+		},
+		{
+			testName: "idx out of uppder bound",
+			input:    []string{"c3", "c4", "c1", "c5"},
+			index:    4,
+			want:     []string{"c3", "c4", "c1", "c5"},
+		},
+		{
+			testName: "idx is last element",
+			input:    []string{"c3", "c4", "c1", "c5"},
+			index:    3,
+			want:     []string{"c3", "c4", "c1"},
+		},
+		{
+			testName: "idx is first element",
+			input:    []string{"c3", "c4", "c1", "c5"},
+			index:    0,
+			want:     []string{"c4", "c1", "c5"},
+		},
+		{
+			testName: "idx is in bounds",
+			input:    []string{"c3", "c4", "c1", "c5"},
+			index:    1,
+			want:     []string{"c3", "c1", "c5"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.testName, func(t *testing.T) {
+			got := deleteAtIdx(tc.input, tc.index)
+
+			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("got: %+v, want %+v", got, tc.want)
 			}
 		})

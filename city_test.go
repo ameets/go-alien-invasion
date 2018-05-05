@@ -8,7 +8,6 @@ import (
 )
 
 func TestRemoveConnection(t *testing.T) {
-	log.SetFlags(0)
 	log.SetOutput(ioutil.Discard)
 	// Initial setup
 	c1 := NewCity("c1", map[string]string{
@@ -57,7 +56,6 @@ func TestRemoveConnection(t *testing.T) {
 }
 
 func TestHasAlien(t *testing.T) {
-	log.SetFlags(0)
 	log.SetOutput(ioutil.Discard)
 	// Initial setup
 	c1 := NewCity("c1", map[string]string{
