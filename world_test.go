@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -83,4 +84,73 @@ func TestDestroyCity(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetCities(t *testing.T) {
+	// Initial setup
+	c1 := City{
+		Name: "c1",
+		Connections: map[string]string{
+			"c2": "north",
+			"c3": "south",
+		},
+	}
+
+	c2 := City{
+		Name: "c2",
+		Connections: map[string]string{
+			"c1": "south",
+		},
+	}
+
+	c3 := City{
+		Name: "c3",
+		Connections: map[string]string{
+			"c1": "north",
+		},
+	}
+
+	w := World{
+		Cities: map[string]City{
+			"c3": c3,
+			"c2": c2,
+			"c1": c1,
+		},
+	}
+
+	wEmpty := World{
+		Cities: map[string]City{},
+	}
+
+	// Test cases
+	cases := []struct {
+		testName string
+		world    World
+		want     sort.StringSlice
+	}{
+		{
+			testName: "empty world",
+			world:    wEmpty,
+			want:     []string{},
+		},
+		{
+			testName: "populated world",
+			world:    w,
+			want:     []string{"c1", "c2", "c3"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.testName, func(t *testing.T) {
+			got := tc.world.getCities()
+
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("got: %+v, want %+v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCreateAliens(t *testing.T) {
+
 }
