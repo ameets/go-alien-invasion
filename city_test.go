@@ -23,6 +23,12 @@ func TestRemoveConnection(t *testing.T) {
 			"c1": "south",
 		},
 	}
+
+	c2After := City{
+		Name:        "c2",
+		Connections: map[string]string{},
+	}
+
 	// Test cases
 	cases := []struct {
 		testName string
@@ -40,7 +46,7 @@ func TestRemoveConnection(t *testing.T) {
 			testName: "destroy connection",
 			city:     "c1",
 			input:    c2,
-			want:     City{Name: "c2", Connections: map[string]string{}},
+			want:     c2After,
 		},
 	}
 
