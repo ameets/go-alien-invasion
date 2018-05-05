@@ -3,12 +3,11 @@ package main
 type Alien struct {
 	Name      int
 	MoveCount int
-	Location  string // city name
 }
 
-func NewAlien(n int, l string) Alien {
+func NewAlien(n int) Alien {
 	return Alien{
-		Name:     n,
-		Location: l,
+		Name:      n,
+		MoveCount: 0,
 	}
 }

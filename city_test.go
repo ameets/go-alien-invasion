@@ -1,33 +1,28 @@
 package main
 
 import (
+	"io/ioutil"
+	"log"
 	"reflect"
 	"testing"
 )
 
 func TestRemoveConnection(t *testing.T) {
+	log.SetFlags(0)
+	log.SetOutput(ioutil.Discard)
 	// Initial setup
-	c1 := City{
-		Name: "c1",
-		Connections: map[string]string{
-			"c2": "north",
-			"c3": "south",
-			"c4": "east",
-			"c5": "west",
-		},
-	}
+	c1 := NewCity("c1", map[string]string{
+		"c2": "north",
+		"c3": "south",
+		"c4": "east",
+		"c5": "west",
+	})
 
-	c2 := City{
-		Name: "c2",
-		Connections: map[string]string{
-			"c1": "south",
-		},
-	}
+	c2 := NewCity("c2", map[string]string{
+		"c1": "south",
+	})
 
-	c2After := City{
-		Name:        "c2",
-		Connections: map[string]string{},
-	}
+	c2After := NewCity("c2", map[string]string{})
 
 	// Test cases
 	cases := []struct {
@@ -56,6 +51,52 @@ func TestRemoveConnection(t *testing.T) {
 
 			if !reflect.DeepEqual(tc.input, tc.want) {
 				t.Errorf("got: %+v, want %+v", tc.input, tc.want)
+			}
+		})
+	}
+}
+
+func TestHasAlien(t *testing.T) {
+	log.SetFlags(0)
+	log.SetOutput(ioutil.Discard)
+	// Initial setup
+	c1 := NewCity("c1", map[string]string{
+		"c2": "north",
+		"c3": "south",
+		"c4": "east",
+		"c5": "west",
+	})
+
+	c2 := NewCity("c2", map[string]string{
+		"c1": "south",
+	})
+
+	c2.Alien.Name = 1
+
+	// Test cases
+	cases := []struct {
+		testName string
+		city     City
+		want     bool
+	}{
+		{
+			testName: "alien dne",
+			city:     c1,
+			want:     false,
+		},
+		{
+			testName: "alien exits",
+			city:     c2,
+			want:     true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.testName, func(t *testing.T) {
+			got := tc.city.HasAlien()
+
+			if got != tc.want {
+				t.Errorf("got: %+v, want: %+v", got, tc.want)
 			}
 		})
 	}

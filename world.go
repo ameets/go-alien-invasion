@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"math/rand"
-	"sort"
 	"time"
 )
 
@@ -14,18 +13,20 @@ type World struct {
 
 func NewWorld() World {
 	return World{
-		Aliens: make(map[int]Alien),
+		Aliens: make(map[int]Alien), //todo maybe use map[int]int for alien -> moveCount
 		Cities: make(map[string]City),
 	}
 }
 
-func (w *World) DestroyCity(city string) {
-	if _, ok := w.Cities[city]; ok {
+func (w *World) DestroyCity(city string, a int) {
+	if v, ok := w.Cities[city]; ok {
 		for _, c := range w.Cities {
 			c.RemoveConnection(city)
 		}
+		log.Println("%s has been destroyed by alien %d and alien %d", city, v.Alien.Name, a)
 		delete(w.Cities, city)
-		log.Printf("%s has been destroyed", city)
+		delete(w.Aliens, v.Alien.Name)
+
 	}
 }
 
@@ -38,22 +39,44 @@ func (w *World) CreateAliens(n int) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	cities := w.getCities()
-	for i := 0; i < n; i++ {
+	for i := 1; i <= n; i++ {
+		if len(cities) == 0 { //all cities destroyed
+			break
+		}
 		idx := r.Intn(len(cities)) //[0,len(cities))
-		alien := NewAlien(i, cities[idx])
-		w.Aliens[i] = alien
+		c, ok := w.Cities[cities[idx]]
+		if !ok {
+			panic("unexpected error")
+		}
+		if c.HasAlien() {
+			w.DestroyCity(c.Name, i)
+			cities = deleteAtIdx(cities, idx)
+		} else {
+			c.Alien.Name = i
+		}
+
 	}
-	// TODO: aliens may be randomly placed in the same city
-	// and need to fight
 }
 
-func (w *World) getCities() sort.StringSlice {
-	var cities sort.StringSlice = make([]string, len(w.Cities))
+func (w *World) getCities() []string {
+	cities := make([]string, len(w.Cities))
 	i := 0
 	for k, _ := range w.Cities {
 		cities[i] = k
 		i++
 	}
-	sort.Sort(cities) //ascending
 	return cities
+}
+
+func deleteAtIdx(s []string, idx int) []string {
+	// do nothing if out of bounds
+	if idx < 0 || idx >= len(s) {
+		return s
+	}
+
+	// if idx == len(s)-1 { //last element
+	// 	return append(s[:idx]) //delete last element
+	// }
+	return append(s[:idx], s[idx+1:]...) //delete element at idx
+
 }
