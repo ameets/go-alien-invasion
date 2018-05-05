@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -127,7 +128,7 @@ func TestGetCities(t *testing.T) {
 	cases := []struct {
 		testName string
 		world    World
-		want     []string
+		want     sort.StringSlice
 	}{
 		{
 			testName: "empty world",
@@ -143,9 +144,11 @@ func TestGetCities(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.testName, func(t *testing.T) {
-			got := tc.world.getCities()
+			var got sort.StringSlice = tc.world.getCities()
+			sort.Sort(got)
+			sort.Sort(tc.want)
 
-			if len(got) != len(tc.want) {
+			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("got: %+v, want %+v", got, tc.want)
 			}
 		})
