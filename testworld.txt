@@ -1,0 +1,8 @@
+Foo1 north=Bar! west=Baz south=Qu-ux
+
+Bar! south=Foo1 west=Bee
+Baz east=Foo1 north=Bee
+Qu-ux north=Foo1
+Bee east=Bar! south=Baz
+Bee east=Zorp
+Zorp portal=Foo1
