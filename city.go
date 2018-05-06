@@ -29,7 +29,7 @@ func (d Direction) String() string {
 type City struct {
 	Name        string
 	Connections map[string]string // city -> direction
-	Alien       Alien
+	Alien       int
 }
 
 // RemoveConnection takes in a city name and removes it
@@ -43,7 +43,7 @@ func (c *City) RemoveConnection(city string) {
 // HasAlien returns false if Alien.Name is -1,
 // true otherwise.
 func (c *City) HasAlien() bool {
-	if c.Alien.Name == -1 {
+	if c.Alien == -1 {
 		return false
 	}
 	return true
@@ -55,6 +55,6 @@ func NewCity(n string, c map[string]string) City {
 	return City{
 		Name:        n,
 		Connections: c,
-		Alien:       NewAlien(-1),
+		Alien:       -1,
 	}
 }

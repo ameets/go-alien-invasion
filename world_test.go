@@ -15,7 +15,7 @@ func TestDestroyCity(t *testing.T) {
 		"c2": "north",
 		"c3": "south",
 	})
-	c1.Alien.Name = 1
+	c1.Alien = 1
 
 	c2 := NewCity("c2", map[string]string{
 		"c1": "south",
@@ -35,8 +35,8 @@ func TestDestroyCity(t *testing.T) {
 		"c2": c2,
 		"c3": c3,
 	}
-	w.Aliens = map[int]Alien{
-		c1.Alien.Name: c1.Alien,
+	w.Aliens = map[int]int{
+		c1.Alien: 0,
 	}
 
 	wAfter := NewWorld()

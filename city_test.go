@@ -69,7 +69,7 @@ func TestHasAlien(t *testing.T) {
 		"c1": "south",
 	})
 
-	c2.Alien.Name = 1
+	c2.Alien = 1
 
 	// Test cases
 	cases := []struct {

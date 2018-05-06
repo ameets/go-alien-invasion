@@ -6,15 +6,17 @@ import (
 	"time"
 )
 
+const minMoves = 10000
+
 type World struct {
-	Aliens map[int]Alien
+	Aliens map[int]int
 	Cities map[string]City
 }
 
 func NewWorld() World {
 	return World{
-		Aliens: make(map[int]Alien), //todo maybe use map[int]int for alien -> moveCount
-		Cities: make(map[string]City),
+		Aliens: make(map[int]int),     // alien -> moveCount
+		Cities: make(map[string]City), // city name -> city struct
 	}
 }
 
@@ -26,10 +28,17 @@ func (w *World) DestroyCity(name string, a int) {
 		for _, c := range w.Cities {
 			c.RemoveConnection(name)
 		}
-		log.Println("%s has been destroyed by alien %d and alien %d!", city.Name, city.Alien.Name, a)
+		log.Println("%s has been destroyed by alien %d and alien %d!", city.Name, city.Alien, a)
 		delete(w.Cities, city.Name)
-		delete(w.Aliens, city.Alien.Name)
+		delete(w.Aliens, city.Alien)
 	}
+}
+
+func (w *World) Move() bool {
+	if len(w.Cities) == 0 || len(w.Aliens) == 0 {
+		return false
+	}
+	return true
 }
 
 // CreateAliens takes in the number of aliens to create.
@@ -63,8 +72,8 @@ func (w *World) CreateAliens(n int) {
 			cities = deleteAtIdx(cities, idx)
 		} else {
 			// create alien in city and add to the world
-			c.Alien.Name = i
-			w.Aliens[i] = c.Alien
+			c.Alien = i
+			w.Aliens[i] = 0
 		}
 	}
 }
